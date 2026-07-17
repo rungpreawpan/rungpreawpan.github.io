@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --sidebar: #ffffff;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e6e8ec;
+  --accent: #4f46e5;
+  --accent-2: #06b6d4;
+  --accent-soft: #eef2ff;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text",
+    "Segoe UI", "Noto Sans Thai", system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
+}
+
+.accent-gradient {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.accent-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d3d7de;
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
