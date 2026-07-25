@@ -18,10 +18,9 @@ const NAV = [
 export default function Portfolio() {
   const [lang, setLang] = useState<Language>("th");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resumeOpen, setResumeOpen] = useState(false);
   const [active, setActive] = useState("about");
   const [progress, setProgress] = useState(0);
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
 
   useEffect(() => {
     const saved = (localStorage.getItem(STORAGE_KEY) || "th") as Language;
@@ -75,11 +74,26 @@ export default function Portfolio() {
 
   // lock body scroll when mobile menu open
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    document.body.style.overflow = menuOpen || resumeOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, resumeOpen]);
+
+  useEffect(() => {
+    if (!resumeOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setResumeOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [resumeOpen]);
 
   const changeLang = (l: Language) => {
     setLang(l);
@@ -87,19 +101,6 @@ export default function Portfolio() {
   };
 
   const t = portfolioI18n[lang];
-
-  const submitContact = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs: typeof errors = {};
-    if (!form.name.trim()) errs.name = t.formErrName;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t.formErrEmail;
-    if (!form.message.trim()) errs.message = t.formErrMsg;
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    const subject = encodeURIComponent(`${t.mailSubject} — ${form.name}`);
-    const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
-    window.location.href = `mailto:siri.preawpan@gmail.com?subject=${subject}&body=${body}`;
-  };
 
   return (
     <div className="bg-[#0e1412] text-[#eaece7] min-h-screen scroll-smooth">
@@ -218,9 +219,8 @@ export default function Portfolio() {
             <span className="w-2 h-2 rounded-full bg-[#35d0a5] shadow-lg"></span>
             {t.status}
           </div>
-          {/* avatar วงกลมเฉพาะจอเล็ก (การ์ดใหญ่ด้านขวาถูกซ่อน <lg) — สลับเป็นรูปจริงได้โดยแทนตัว PS ด้วย <img src="/profile.jpg" className="w-full h-full object-cover rounded-full" /> */}
-          <div className="flex lg:hidden w-20 h-20 rounded-full bg-gradient-to-br from-[#35d0a5] to-[#1fa27e] items-center justify-center mb-6">
-            <span className="text-2xl font-black text-[#062a20]">PS</span>
+          <div className="flex lg:hidden w-20 h-20 rounded-full overflow-hidden border-2 border-[#35d0a5] mb-6">
+            <img src="/rung.png" alt="Preawpan Siriphalangkanont" className="w-full h-full object-cover" />
           </div>
           <p className="text-sm text-[#8a978f] mb-2 font-semibold tracking-widest">I'M</p>
           <h1 className="text-7xl sm:text-8xl font-black leading-tight mb-6 -tracking-tight">
@@ -234,24 +234,68 @@ export default function Portfolio() {
             <a href="#work" className="px-6 py-3 text-sm font-bold bg-[#35d0a5] text-[#062a20] rounded hover:brightness-110 transition uppercase tracking-wider">
               {t.btnWork}
             </a>
-            <a
-              href="/resume.pdf"
-              download
+            <button
+              type="button"
+              onClick={() => setResumeOpen(true)}
               className="px-6 py-3 text-sm font-bold border border-[#24302b] text-white rounded hover:border-[#35d0a5] hover:text-[#35d0a5] transition uppercase tracking-wider flex items-center gap-2"
             >
-              ⬇ {t.btnResume}
-            </a>
+              {t.btnResume}
+            </button>
           </div>
         </div>
-        {/* การ์ดใหญ่เฉพาะ desktop — สลับเป็นรูปจริงได้โดยแทนตัว PS ด้วย <img src="/profile.jpg" className="absolute inset-0 w-full h-full object-cover rounded" /> */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-96 aspect-[4/5] bg-gradient-to-br from-[#35d0a5] to-[#1fa27e] rounded flex items-center justify-center hidden lg:flex flex-col p-6 text-[#062a20]">
-          <div className="text-9xl font-black opacity-80 mb-auto">PS</div>
-          <div className="text-center">
-            <div className="font-bold text-lg mb-1">Preawpan Siriphalangkanont</div>
-            <div className="text-sm opacity-75">Mobile Developer · Flutter</div>
-          </div>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-96 aspect-[4/5] rounded overflow-hidden hidden lg:flex border border-[#35d0a5]/60">
+          <img src="/rung.png" alt="Preawpan Siriphalangkanont" className="w-full h-full object-cover" />
         </div>
       </section>
+
+      {resumeOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-[#0e1412]/90 backdrop-blur-sm px-4 py-6 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t.resumePreview}
+        >
+          <div className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded border border-[#24302b] bg-[#f2f1ea] text-[#1b1f1d] shadow-2xl">
+            <div className="flex items-center justify-between gap-3 border-b border-[#cfccc2] px-4 py-3 sm:px-5">
+              <h2 className="text-base font-black uppercase tracking-wider">{t.resumePreview}</h2>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/resume.pdf"
+                  download
+                  className="rounded bg-[#1b1f1d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#0e7a5f]"
+                >
+                  {t.resumeDownload}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setResumeOpen(false)}
+                  className="rounded border border-[#1b1f1d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1b1f1d] transition hover:border-[#0e7a5f] hover:text-[#0e7a5f]"
+                >
+                  {t.close}
+                </button>
+              </div>
+            </div>
+            <object
+              data="/resume.pdf#toolbar=0&navpanes=0&scrollbar=1"
+              type="application/pdf"
+              className="min-h-0 w-full flex-1 bg-white"
+              aria-label={t.resumePreview}
+            >
+              <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-white p-6 text-center">
+                <p className="text-sm text-[#7b7f7a]">{t.resumePreviewFallback}</p>
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded border border-[#1b1f1d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1b1f1d] transition hover:border-[#0e7a5f] hover:text-[#0e7a5f]"
+                >
+                  {t.resumeOpenPdf}
+                </a>
+              </div>
+            </object>
+          </div>
+        </div>
+      )}
 
       {/* About */}
       <section id="about" className="bg-[#f2f1ea] text-[#1b1f1d] py-24 px-6">
@@ -421,7 +465,7 @@ export default function Portfolio() {
                   </div>
                 </div>
                 <a
-                  href="https://ieeexplore.ieee.org/search/searchresult.jsp?queryText=An%20Indoor%20Context-Aware%20Obstacle%20Detection%20Application%20for%20Visually%20Impaired%20Users"
+                  href="https://ieeexplore.ieee.org/document/11298017"
                   target="_blank"
                   rel="noreferrer"
                   className="shrink-0 px-4 py-2.5 text-xs font-bold bg-[#35d0a5] text-[#062a20] rounded hover:brightness-110 transition uppercase tracking-wider self-start sm:self-center"
@@ -481,6 +525,19 @@ export default function Portfolio() {
                 <div>
                   <h3 className="font-bold text-sm mb-1 leading-snug">{c.name}</h3>
                   <p className="text-xs text-[#35d0a5]/80 font-semibold tracking-wider uppercase">{c.issuer}</p>
+                  {"issued" in c && c.issued && (
+                    <p className="text-xs text-[#8a978f] mt-2">{t.certIssued}: {c.issued}</p>
+                  )}
+                  {"href" in c && c.href && (
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex mt-3 text-xs font-bold text-[#35d0a5] hover:text-white transition-colors"
+                    >
+                      {t.certView}
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -490,63 +547,64 @@ export default function Portfolio() {
 
       {/* Contact */}
       <section id="contact" className="bg-[#f2f1ea] text-[#1b1f1d] py-24 px-6 text-center">
-        <div className="max-w-2xl mx-auto rv">
+        <div className="max-w-4xl mx-auto rv">
           <h2 className="text-5xl font-black mb-3 leading-tight">
             {lang === "th" ? "สนใจร่วมงานกัน " : "Interested in working together? "}
-            <span className="text-[#0e7a5f]">{lang === "th" ? "ทักมาคุยได้เลย" : "Let's talk."}</span>
+            <span className="block text-[#0e7a5f]">{lang === "th" ? "ติดต่อเพื่อร่วมงาน" : "Let's talk."}</span>
           </h2>
-          <p className="text-[#7b7f7a] mb-8">{t.contactSub}</p>
+          <p className="text-[#7b7f7a] mb-10">{t.contactSub}</p>
 
-          <form onSubmit={submitContact} noValidate className="text-left max-w-lg mx-auto mb-10">
-            <div className="grid sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <input
-                  type="text"
-                  placeholder={t.formName}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded border border-[#cfccc2] bg-white text-sm focus:outline-none focus:border-[#0e7a5f]"
-                />
-                {errors.name && <p className="text-xs text-[#b3372a] mt-1">{errors.name}</p>}
-              </div>
-              <div>
-                <input
-                  type="email"
-                  placeholder={t.formEmail}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-4 py-3 rounded border border-[#cfccc2] bg-white text-sm focus:outline-none focus:border-[#0e7a5f]"
-                />
-                {errors.email && <p className="text-xs text-[#b3372a] mt-1">{errors.email}</p>}
-              </div>
-            </div>
-            <textarea
-              placeholder={t.formMsg}
-              rows={4}
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full px-4 py-3 rounded border border-[#cfccc2] bg-white text-sm focus:outline-none focus:border-[#0e7a5f] resize-y"
-            />
-            {errors.message && <p className="text-xs text-[#b3372a] mt-1">{errors.message}</p>}
-            <button
-              type="submit"
-              className="mt-4 w-full sm:w-auto px-8 py-3 text-sm font-bold bg-[#1b1f1d] text-white rounded hover:bg-[#0e7a5f] transition uppercase tracking-wider"
-            >
-              {t.formSend}
-            </button>
-          </form>
-
-          <p className="text-xs text-[#7b7f7a] uppercase tracking-widest mb-4">{t.orReach}</p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <a href="mailto:siri.preawpan@gmail.com" className="px-6 py-3 text-sm font-bold bg-[#1b1f1d] text-white rounded hover:bg-[#0e7a5f] transition uppercase tracking-wider">
-              siri.preawpan@gmail.com
-            </a>
-            <a href="https://www.linkedin.com/in/preawpan-siriphalangkanont" target="_blank" rel="noreferrer" className="px-6 py-3 text-sm font-bold border border-[#1b1f1d] text-[#1b1f1d] rounded hover:border-[#0e7a5f] hover:text-[#0e7a5f] transition uppercase tracking-wider flex items-center gap-2">
-              LinkedIn
-            </a>
-            <a href="tel:+66809537819" className="px-6 py-3 text-sm font-bold border border-[#1b1f1d] text-[#1b1f1d] rounded hover:border-[#0e7a5f] hover:text-[#0e7a5f] transition uppercase tracking-wider">
-              (+66) 080 953 7819
-            </a>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                label: "Email",
+                value: "siri.preawpan@gmail.com",
+                href: "mailto:siri.preawpan@gmail.com",
+                icon: (
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="m3 7 9 6 9-6" />
+                  </svg>
+                ),
+              },
+              {
+                label: "LinkedIn",
+                value: "preawpan-siriphalangkanont",
+                href: "https://www.linkedin.com/in/preawpan-siriphalangkanont-3781791ba/",
+                icon: (
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                    <path d="M6.9 8.9H3.8v10.3h3.1V8.9ZM5.4 4.8a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6Zm13.8 8.6c0-3-1.6-4.8-4.1-4.8-1.7 0-2.7.9-3.1 1.7h-.1V8.9H9v10.3h3.1v-5.1c0-1.4.7-2.6 2.1-2.6 1.3 0 1.9.9 1.9 2.6v5.1h3.1v-5.8Z" />
+                  </svg>
+                ),
+              },
+              {
+                label: "Tel",
+                value: "(+66) 080 953 7819",
+                href: "tel:+66809537819",
+                icon: (
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" />
+                  </svg>
+                ),
+              },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                target={item.label === "LinkedIn" ? "_blank" : undefined}
+                rel={item.label === "LinkedIn" ? "noreferrer" : undefined}
+                className="group flex gap-4 rounded border border-[#24302b] bg-[#131b18] p-5 text-left shadow-[0_18px_45px_rgba(14,20,18,0.18)] transition hover:-translate-y-1 hover:border-[#35d0a5] hover:shadow-[0_22px_55px_rgba(14,122,95,0.2)]"
+              >
+                <span className="block w-1 shrink-0 rounded bg-[#35d0a5]" />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="mb-4 flex h-11 w-11 shrink-0 items-center justify-center rounded border border-[#35d0a5]/35 text-[#35d0a5] transition group-hover:border-[#35d0a5] group-hover:bg-[#35d0a5] group-hover:text-[#062a20]">
+                    {item.icon}
+                  </span>
+                  <span className="text-xs font-black uppercase tracking-widest text-[#8a978f]">{item.label}</span>
+                  <span className="mt-2 break-words text-sm font-bold leading-snug text-white">{item.value}</span>
+                </span>
+              </a>
+            ))}
           </div>
         </div>
       </section>
