@@ -3,7 +3,7 @@ import "./globals.css";
 
 const title = "Preawpan Siriphalangkanont — Mobile Developer";
 const description =
-  "Mobile Developer เชี่ยวชาญ Flutter — สร้างแอประดับองค์กร 14+ โปรเจกต์ ตั้งแต่ CRM, fleet management ไปจนถึงงานวิจัยตีพิมพ์ด้านแอปนำทางเพื่อผู้พิการทางสายตา";
+  "Mobile Developer specializing in Flutter, with 14+ enterprise apps shipped across CRM, fleet management, logistics, workforce tools, and published accessibility research.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://preawpan.dev"),
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="th">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

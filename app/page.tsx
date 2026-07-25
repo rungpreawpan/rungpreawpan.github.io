@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { portfolioI18n, type Language } from "@/data/portfolio-i18n";
-
-const STORAGE_KEY = "pf-lang";
+import { portfolioContent } from "@/data/portfolio-i18n";
 
 const NAV = [
   { id: "about", label: "About" },
@@ -16,16 +14,10 @@ const NAV = [
 ];
 
 export default function Portfolio() {
-  const [lang, setLang] = useState<Language>("th");
   const [menuOpen, setMenuOpen] = useState(false);
   const [resumeOpen, setResumeOpen] = useState(false);
   const [active, setActive] = useState("about");
   const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const saved = (localStorage.getItem(STORAGE_KEY) || "th") as Language;
-    setLang(saved);
-  }, []);
 
   // reveal + scroll-spy + progress
   useEffect(() => {
@@ -95,12 +87,7 @@ export default function Portfolio() {
     };
   }, [resumeOpen]);
 
-  const changeLang = (l: Language) => {
-    setLang(l);
-    localStorage.setItem(STORAGE_KEY, l);
-  };
-
-  const t = portfolioI18n[lang];
+  const t = portfolioContent;
 
   return (
     <div className="bg-[#0e1412] text-[#eaece7] min-h-screen scroll-smooth">
@@ -150,38 +137,10 @@ export default function Portfolio() {
                 {n.label}
               </a>
             ))}
-            <div className="flex border border-[#24302b] rounded">
-              <button
-                onClick={() => changeLang("th")}
-                className={`px-3 py-1 text-xs font-bold ${lang === "th" ? "bg-[#35d0a5] text-[#062a20]" : ""}`}
-              >
-                TH
-              </button>
-              <button
-                onClick={() => changeLang("en")}
-                className={`px-3 py-1 text-xs font-bold ${lang === "en" ? "bg-[#35d0a5] text-[#062a20]" : ""}`}
-              >
-                EN
-              </button>
-            </div>
           </nav>
 
           {/* mobile controls */}
           <div className="flex md:hidden items-center gap-3">
-            <div className="flex border border-[#24302b] rounded">
-              <button
-                onClick={() => changeLang("th")}
-                className={`px-2.5 py-1 text-xs font-bold ${lang === "th" ? "bg-[#35d0a5] text-[#062a20]" : "text-[#8a978f]"}`}
-              >
-                TH
-              </button>
-              <button
-                onClick={() => changeLang("en")}
-                className={`px-2.5 py-1 text-xs font-bold ${lang === "en" ? "bg-[#35d0a5] text-[#062a20]" : "text-[#8a978f]"}`}
-              >
-                EN
-              </button>
-            </div>
             <button
               aria-label="Menu"
               aria-expanded={menuOpen}
@@ -387,7 +346,7 @@ export default function Portfolio() {
             ].map((g) => (
               <div key={g.group} className="mb-12 last:mb-0">
                 <div className="rv flex items-center gap-4 mb-2">
-                  <span className="text-xs text-[#35d0a5] font-bold tracking-[0.22em] uppercase whitespace-nowrap">{g.group}</span>
+                  <span className="text-xs text-[#35d0a5] font-bold tracking-wide whitespace-nowrap">{g.group}</span>
                   <span className="h-px flex-1 bg-[#24302b]" />
                 </div>
                 {g.items.map((p) => (
@@ -523,20 +482,23 @@ export default function Portfolio() {
               <div key={c.name} className="rv border border-[#24302b] bg-[#131b18] rounded p-5 flex gap-4 hover:border-[#35d0a5] transition-colors">
                 <span className="text-2xl shrink-0">📜</span>
                 <div>
-                  <h3 className="font-bold text-sm mb-1 leading-snug">{c.name}</h3>
+                  <h3 className="font-bold text-sm mb-1 leading-snug">
+                    {"href" in c && c.href ? (
+                      <a
+                        href={c.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="transition-colors hover:text-[#35d0a5]"
+                      >
+                        {c.name}
+                      </a>
+                    ) : (
+                      c.name
+                    )}
+                  </h3>
                   <p className="text-xs text-[#35d0a5]/80 font-semibold tracking-wider uppercase">{c.issuer}</p>
                   {"issued" in c && c.issued && (
                     <p className="text-xs text-[#8a978f] mt-2">{t.certIssued}: {c.issued}</p>
-                  )}
-                  {"href" in c && c.href && (
-                    <a
-                      href={c.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex mt-3 text-xs font-bold text-[#35d0a5] hover:text-white transition-colors"
-                    >
-                      {t.certView}
-                    </a>
                   )}
                 </div>
               </div>
@@ -549,8 +511,8 @@ export default function Portfolio() {
       <section id="contact" className="bg-[#f2f1ea] text-[#1b1f1d] py-24 px-6 text-center">
         <div className="max-w-4xl mx-auto rv">
           <h2 className="text-5xl font-black mb-3 leading-tight">
-            {lang === "th" ? "สนใจร่วมงานกัน " : "Interested in working together? "}
-            <span className="block text-[#0e7a5f]">{lang === "th" ? "ติดต่อเพื่อร่วมงาน" : "Let's talk."}</span>
+            Interested in working together?
+            <span className="block text-[#0e7a5f]">Let's talk.</span>
           </h2>
           <p className="text-[#7b7f7a] mb-10">{t.contactSub}</p>
 
